@@ -1,0 +1,109 @@
+@page "/library"
+@using BlazorApp.Models
+
+<h1>Biblioteka stron</h1>
+
+<input type="text"
+       placeholder="np. https://www.onet.pl"
+       @bind="PageUrl"
+       @oninput="@(e => TrimPageUrl(e.Value?.ToString()))" />
+
+<button class="btn btn-success" @onclick="AddPage">+</button>
+
+<br /><br />
+
+@if (Pages.Count == 0)
+{
+    <div class="empty-container">
+        <div class="blank-text">blank</div>
+        <div class="empty-text">brak stron</div>
+    </div>
+}
+else
+{
+    <div class="grid-container">
+        @foreach (var page in Pages)
+        {
+            <div class="grid-item">
+                @((MarkupString)page.Html)
+            </div>
+        }
+    </div>
+}
+
+
+@code {
+
+    private string PageUrl;
+    private string PageName;
+
+    private List<Page> Pages = new();
+
+    private void TrimPageUrl(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return;
+
+        PageUrl = url.Trim();
+
+        PageName = PageUrl
+            .Replace("https://", "")
+            .Replace("http://", "")
+            .Replace("www.", "");
+
+        if (PageName.Contains("/"))
+            PageName = PageName.Split('/')[0];
+
+        if (PageName.Contains("."))
+            PageName = PageName.Split('.')[0];
+    }
+
+    private void AddPage()
+    {
+        if (string.IsNullOrWhiteSpace(PageUrl))
+            return;
+
+        Pages.Add(new Page
+        {
+            Url = PageUrl,
+            Name = PageName
+        });
+
+        PageUrl = string.Empty;
+        PageName = string.Empty;
+    }
+}
+
+
+
+<style>
+    .grid-container {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        background-color: #2196F3;
+        padding: 10px;
+    }
+
+    .grid-item {
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        font-size: 30px;
+        text-align: center;
+    }
+
+    .empty-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .blank-text {
+        font-size: 48px;
+    }
+
+    .empty-text {
+        font-size: 20px;
+    }
+</style>
